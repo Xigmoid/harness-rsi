@@ -32,7 +32,7 @@ OT_FAMILIES ?= issue,tezos,superuser
 
 # Export only what the caller actually set.  The defaults above are
 # documentation: the environment wins over ``.env`` (the rule lives in
-# ``opencode_sft/load_env.sh``), so exporting a default would silently
+# ``common/load_env.sh``), so exporting a default would silently
 # override the endpoint and the run root that a researcher put in ``.env``.
 export $(foreach v,PY3 PY MODEL_BASE_URL MODEL_NAME RUN_ROOT,$(if $(filter command line environment,$(origin $(v))),$(v)))
 
@@ -79,9 +79,9 @@ setup:
 # The first two are needed for ClawGym and OpenThoughts/issue, the third for
 # OpenThoughts/tezos and superuser.
 images:
-	docker build -f opencode_sft/images/oc-base-clawgym.Dockerfile -t rsi/oc-base-clawgym:1 .
-	docker build -f opencode_sft/images/oc-base-issue-py310.Dockerfile -t rsi/oc-base-issue-py310:1 .
-	docker build -f opencode_sft/images/oc-base-plain.Dockerfile -t rsi/oc-base-plain:1 .
+	docker build -f common/images/oc-base-clawgym.Dockerfile -t rsi/oc-base-clawgym:1 .
+	docker build -f common/images/oc-base-issue-py310.Dockerfile -t rsi/oc-base-issue-py310:1 .
+	docker build -f common/images/oc-base-plain.Dockerfile -t rsi/oc-base-plain:1 .
 
 # --------------------------------------------------------------------------- #
 # 2. the mini-swe-agent toolchain bundle
@@ -114,11 +114,11 @@ registry-ot:
 # The stages run in order -- ClawGym first, then OpenThoughts -- and each
 # one checks its own output before the next one starts.
 annotate:
-	bash opencode_sft/run_all_stages.sh
+	bash common/run_all_stages.sh
 
 # Only the ClawGym half, for a quick check.
 annotate-clawgym:
-	STAGES="clawgym-split clawgym-run" bash opencode_sft/run_all_stages.sh
+	STAGES="clawgym-split clawgym-run" bash common/run_all_stages.sh
 
 # --------------------------------------------------------------------------- #
 # 5. the dataset
@@ -132,7 +132,7 @@ annotate-clawgym:
 # deleted.
 dataset:
 	STAGES="clawgym-convert clawgym-merge openthoughts-convert" \
-		bash opencode_sft/run_all_stages.sh
+		bash common/run_all_stages.sh
 
 # --------------------------------------------------------------------------- #
 # 6. the checks
@@ -141,9 +141,9 @@ dataset:
 # disk and checks it against the registry, not against the generator's own
 # in-memory objects.
 verify:
-	$(PY3) opencode_sft/clawgym/validate_sft.py \
-		--dataset opencode_sft/clawgym/dataset/clawgym-sft.jsonl \
-		--registry opencode_sft/registry_clawgym
+	$(PY3) common/validate_sft.py \
+		--dataset work/dataset/clawgym-sft.jsonl \
+		--registry work/registry_clawgym
 
 # A cheap end-to-end smoke test: one task per harness, converted and
 # validated.  It is what to run first when something looks wrong.
@@ -154,5 +154,4 @@ check:
 # housekeeping
 # --------------------------------------------------------------------------- #
 clean-outputs:
-	rm -rf opencode_sft/clawgym/dataset opencode_sft/mini_sft/dataset \
-		opencode_sft/dataset
+	rm -rf work/dataset opencode_sft/dataset mini_sft/dataset

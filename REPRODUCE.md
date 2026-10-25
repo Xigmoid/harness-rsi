@@ -38,7 +38,7 @@ One JSON object per line, OpenAI Chat Completions shaped:
 * `messages` is the **model-side** view: the exact message list the agent
   sent to the endpoint, plus the model's final answer (which was never sent
   back).  It is verified byte for byte against a full packet capture --
-  see `opencode_sft/EXECUTION_PLAN.md`.
+  see `common/EXECUTION_PLAN.md`.
 * `conversations` is the **training** view: the same content with the tool
   calls inlined and the reasoning folded into the content, so that it
   alternates user/assistant strictly.
@@ -119,12 +119,12 @@ datasets:
 
 | registry | source | size |
 |---|---|---|
-| `opencode_sft/registry_clawgym` | `RUC-AIBOX/ClawGym-Task` (`syn_task.jsonl`) | 15,402 tasks |
-| `opencode_sft/registry` | `open-thoughts/OpenThoughts-Agent-SFT-31.6K` (`train.parquet`) | 23,225 tasks (`issue`, `tezos`, `superuser`) |
+| `work/registry_clawgym` | `RUC-AIBOX/ClawGym-Task` (`syn_task.jsonl`) | 15,402 tasks |
+| `work/registry` | `open-thoughts/OpenThoughts-Agent-SFT-31.6K` (`train.parquet`) | 23,225 tasks (`issue`, `tezos`, `superuser`) |
 
 The OpenThoughts dataset ships *rollouts*, not tasks, so the task
 instructions have to be cut out of the terminus-2 transcripts byte-identically
-before the environments can be built; `opencode_sft/extract_tasks.py` does
+before the environments can be built; `common/registry/extract_tasks.py` does
 that.
 
 The registries are not in git because they are derived data -- this step
@@ -136,7 +136,7 @@ rebuilds them in a few minutes.
 make annotate
 ```
 
-This is the long part.  `opencode_sft/run_all_stages.sh` runs the stages in
+This is the long part.  `common/run_all_stages.sh` runs the stages in
 order -- ClawGym first, then OpenThoughts -- and each one checks its own
 output before the next one starts.
 
@@ -165,7 +165,7 @@ The validator is an **independent** program: it re-reads the dataset from
 disk and checks it against the registry, not against the generator's
 in-memory objects.  It also has a fault-injection mode -- it is fed
 deliberately broken datasets and has to catch every one of them
-(`opencode_sft/clawgym/validate_sft.py`).
+(`common/validate_sft.py`).
 
 The finished dataset is published as a **GitHub Release** rather than in
 git, because it is gigabytes:
@@ -205,7 +205,7 @@ make annotate                             # runs in the run root from .env
 ```
 
 do what they say.  The rule (and the list of variables it covers) lives in
-`opencode_sft/load_env.sh`, and every script that reads `.env` goes through
+`common/load_env.sh`, and every script that reads `.env` goes through
 it.
 
 ---
@@ -213,7 +213,7 @@ it.
 ## 5. The traps this implementation already handles
 
 These are the ones that cost the most time to find.  They are written up
-in full, with the evidence, in `opencode_sft/EXECUTION_PLAN.md`.
+in full, with the evidence, in `common/EXECUTION_PLAN.md`.
 
 | trap | what it looks like | what it does here |
 |---|---|---|
@@ -231,17 +231,25 @@ in full, with the evidence, in `opencode_sft/EXECUTION_PLAN.md`.
 
 ## 6. What this repository contains
 
-Only the annotation pipeline.  The three pieces:
+Only the annotation pipeline.  Four pieces:
 
 | | |
 |---|---|
-| `opencode_sft/` | the pipeline: the two drivers, the recording proxy, the converters, the validator, the merger, the images, and the execution notes |
+| `opencode_sft/` | the opencode half: its driver, its converters, its wire check, the launchd agents, and a README that documents what opencode does |
+| `mini_sft/` | the mini-swe-agent half: the same file names on the same layout, plus the config the container actually reads |
+| `common/` | what the two halves share: the orchestrator, the recording proxy, the schema, the split, the validator, the merger, the registry builders, the base images, the one-off tools, and the notes |
 | `rsi/` | the two Harbor adapters (`mini-swe-agent` and `opencode`) and the paths they share with the container side |
 | `scripts/`, `datasets/base/toolchain/`, `audit/` | the registry builders, the mini-swe-agent bundle's Dockerfile, and the audit of what Harbor and mini-swe-agent actually do |
 
-The task registries, the toolchain bundle, the images and the finished dataset
-are all derived artefacts, and none of them is in git -- they are rebuilt from
-public sources, or published as a GitHub Release.
+The two harness directories are laid out the same way on purpose: `run_rollouts.py`,
+`build_sft_dataset.py`, `clawgym/build_sft_dataset.py` and `verify_wire.py` exist on
+both sides, so a change to one half can be read against the other without hunting
+for the corresponding file.
+
+Everything generated lives under `work/` and is **not** in git: the task
+registries, the split manifests, the trials, the converted halves, and the merged
+dataset.  `make registry` rebuilds the first two from public sources,
+`make annotate` produces the third, and `make dataset` the last two.
 
 The RSI framework the annotation grew out of (a typed-configuration search over
 agent harnesses, with its own optimizer, ledger and benchmark suites) is **not**

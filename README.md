@@ -59,20 +59,54 @@ The finished dataset is published as a **GitHub Release**, not in git.
 
 ## The layout
 
+Two harness directories, one per harness, with the **same file names on both
+sides** so the two pipelines can be read side by side:
+
 ```
-opencode_sft/            the pipeline
-├── run_rollouts.py          the opencode driver: batches, ledger, harvest
-├── run_mini_rollouts.py     the same for mini-swe-agent
-├── run_all_stages.sh        the orchestrator: split → run → convert → merge,
-│                            with a supervisor that restarts a dead driver
-├── record_proxy.py          the recording proxy: it writes the wire traffic to
-│                            disk and injects the API key on the way out
-├── schema.py                the shared schema: `dataset` / `model` / `harness`
-├── clawgym/                 the ClawGym half: registry builder, converters,
-│                            validator, merger
-├── images/                  the three base images (opencode is baked in)
-├── mini_sft/                the mini config for the OpenThoughts families
-└── EXECUTION_PLAN.md        the traps, with the evidence
+opencode_sft/                 the opencode half
+├── run_rollouts.py               the driver: batches, ledger, harvest
+├── build_sft_dataset.py          the converter for the plain families
+├── clawgym/build_sft_dataset.py  the converter for ClawGym
+├── verify_wire.py                the byte-for-byte check against the capture
+├── regression_converter.py       the converter for the regression set
+├── launchd/                      the two launchd agents that keep the proxy
+│                                and the driver alive
+├── dataset/                      this half's converted trajectories
+└── README.md                     what opencode does, in detail
+
+mini_sft/                     the mini-swe-agent half
+├── run_rollouts.py               the driver: batches, ledger, harvest
+├── build_sft_dataset.py          the converter for the plain families
+├── clawgym/build_sft_dataset.py  the converter for ClawGym
+├── clawgym/mini-config.yaml      the config the container actually reads
+├── build_config.py               builds the config from base_config.yaml
+├── config/                       base_config.yaml + the two derived configs
+├── verify_wire.py                the byte-for-byte check against the capture
+├── dataset/                      this half's converted trajectories
+└── README.md                     what mini-swe-agent does, in detail
+
+common/                       the parts both halves share
+├── run_all_stages.sh             the orchestrator: split → run → convert →
+│                                merge, with a supervisor that restarts a
+│                                dead driver
+├── load_env.sh                  .env loading, with the right precedence
+├── record_proxy.py              the recording proxy: it writes the wire
+│                                traffic to disk and injects the API key on
+│                                the way out
+├── schema.py                    the shared schema: `dataset`/`model`/`harness`
+├── split_tasks.py               the hash split: half the tasks to each harness
+├── validate_sft.py              the dataset validator
+├── merge_sft.py                 merges the two halves
+├── shared_network.py            the one shared Docker network
+├── add_shared_network_compose.py
+├── docker_cleanup.py            reaps the containers a dead driver left
+├── minimax.py                   the second endpoint, off by default
+├── registry/                    the registry builders and their reports
+├── tools/                       the one-off tools that were written along the way
+├── images/                      the base images (opencode is baked in)
+├── README.md                    what the shared parts are, and why they are shared
+├── CLAWGYM.md                   what the ClawGym task family is
+└── EXECUTION_PLAN.md            the traps, with the evidence
 
 rsi/                       the two Harbor adapters
 ├── harbor_agent.py         mini-swe-agent: pins the config, mounts the bundle
@@ -82,7 +116,13 @@ rsi/                       the two Harbor adapters
 scripts/                   registry builders, the toolchain build, the release
 datasets/base/toolchain/   the mini-swe-agent bundle, as a Dockerfile
 audit/                     what Harbor and mini-swe-agent actually do
+work/                      everything generated: registries, tasks, rollouts,
+                           the datasets.  Not in git; rebuilt by `make`.
 ```
+
+Nothing under `work/` is in git: it is all derived, and `make registry` /
+`make annotate` rebuilds it.  The two harness directories each keep their own
+converted half in `dataset/`, and the merged result lands in `work/dataset/`.
 
 ---
 
@@ -120,7 +160,7 @@ the code that produces it, and the notes on what it cost to get right.
 ## The traps this implementation already handles
 
 The ones that cost the most time to find are written up in full, with the
-evidence, in [`opencode_sft/EXECUTION_PLAN.md`](./opencode_sft/EXECUTION_PLAN.md).
+evidence, in [`common/EXECUTION_PLAN.md`](./common/EXECUTION_PLAN.md).
 The short list:
 
 * Docker's default address pool is sixteen networks wide — every new trial dies

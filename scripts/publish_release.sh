@@ -26,16 +26,16 @@ which="${1:-clawgym}"
 
 case "$which" in
   clawgym)
-    DATA=opencode_sft/clawgym/dataset/clawgym-sft.jsonl
-    SUMMARY=opencode_sft/clawgym/dataset/clawgym-sft.summary.json
-    INVALID_DIR=opencode_sft/clawgym/dataset/invalid
+    DATA=work/dataset/clawgym-sft.jsonl
+    SUMMARY=work/dataset/clawgym-sft.summary.json
+    INVALID_DIR=work/dataset/invalid
     TITLE="ClawGym harness-agent SFT dataset"
     DATASET_NAME="ClawGym"
     ;;
   openthoughts)
-    DATA=opencode_sft/dataset/openthoughts-sft.jsonl
-    SUMMARY=opencode_sft/dataset/openthoughts-sft.summary.json
-    INVALID_DIR=opencode_sft/dataset/invalid
+    DATA=work/dataset/openthoughts-sft.jsonl
+    SUMMARY=work/dataset/openthoughts-sft.summary.json
+    INVALID_DIR=work/dataset/invalid
     TITLE="OpenThoughts harness-agent SFT dataset"
     DATASET_NAME="OpenThoughts"
     ;;

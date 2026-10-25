@@ -4,9 +4,8 @@
 # copy the `rsi` package into the bundle; it does not any more, because the
 # rollouts run mini in its default mode.
 #
-# What is left below is what would be *large* if it were sent: the task
-# registries (1.3 GB), the extracted tasks, the pilot registries and the
-# converted datasets.
+# What is left below is what would be *large* if it were sent: the generated
+# task data (1.3 GB), the pilot capture and the converted datasets.
 .venv
 .venv312
 .git
@@ -17,12 +16,8 @@ __pycache__
 *.pyc
 .DS_Store
 datasets/base
-opencode_sft/registry
-opencode_sft/registry_clawgym
-opencode_sft/tasks
-opencode_sft/pilot
+work
 opencode_sft/dataset
-opencode_sft/mini_sft/dataset
-opencode_sft/clawgym/dataset
+mini_sft/dataset
 runs
 ledger

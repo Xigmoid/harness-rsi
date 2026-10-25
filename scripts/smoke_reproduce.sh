@@ -17,9 +17,9 @@ cd "$REPO"
 
 # ``.env`` first, then the environment wins over it: a value that was already
 # set when this script started beats the file.  The rule lives in
-# ``opencode_sft/load_env.sh``, so that every script here reads its
+# ``common/load_env.sh``, so that every script here reads its
 # configuration the same way.
-source "$REPO/opencode_sft/load_env.sh"
+source "$REPO/common/load_env.sh"
 
 PY3="${PY3:-$REPO/.venv/bin/python}"
 PY="${PY:-$REPO/.venv312/bin/python}"
@@ -30,7 +30,7 @@ RUN_ROOT="${RUN_ROOT:-$HOME/.rsi-harbor}"
 SMOKE="$RUN_ROOT/smoke"
 PROXY_PORT="${PROXY_PORT:-8911}"
 
-REG=opencode_sft/registry_clawgym
+REG=work/registry_clawgym
 [[ -d "$REG" ]] || { echo "the ClawGym registry is missing -- run 'make registry-clawgym'" >&2; exit 2; }
 
 mkdir -p "$SMOKE/logs"
@@ -54,7 +54,7 @@ echo "  opencode: $TASK_OC"
 # --------------------------------------------------------------------------- #
 if ! curl -sf -m 5 "http://127.0.0.1:$PROXY_PORT/v1/models" >/dev/null 2>&1; then
   log "starting the recording proxy on $PROXY_PORT"
-  nohup $PY3 opencode_sft/record_proxy.py \
+  nohup $PY3 common/record_proxy.py \
     --port "$PROXY_PORT" --host 0.0.0.0 \
     --upstream "${PROXY_UPSTREAM:-$MODEL_BASE_URL}" \
     --out "$SMOKE/logs/oc-requests.jsonl" \
@@ -67,11 +67,11 @@ fi
 # the two trials
 # --------------------------------------------------------------------------- #
 log "mini-swe-agent: one trial"
-$PY opencode_sft/run_mini_rollouts.py \
+$PY mini_sft/run_rollouts.py \
   --registry $REG \
   --manifest "$SMOKE/mini.jsonl" \
   --run-root "$SMOKE/mini" --families clawgym \
-  --min-config opencode_sft/clawgym/mini-config-clawgym.yaml \
+  --min-config mini_sft/clawgym/mini-config.yaml \
   --batch-size 1 --concurrency 1 --max-batches 1 --enable-verifier \
   --api-base "$MODEL_BASE_URL" --model-name "$LITELLM_NAME" --api-key "${API_KEY:-EMPTY}"
 
@@ -89,17 +89,17 @@ $PY opencode_sft/run_rollouts.py \
 # convert and validate
 # --------------------------------------------------------------------------- #
 log "converting"
-$PY3 opencode_sft/clawgym/build_sft_dataset.py \
+$PY3 mini_sft/clawgym/build_sft_dataset.py \
   --run-root "$SMOKE/mini" --registry $REG \
   --out "$SMOKE/mini-sft.jsonl" --min-reward 0.0 --model "$MODEL_NAME"
-$PY3 opencode_sft/clawgym/build_opencode_sft_dataset.py \
+$PY3 opencode_sft/clawgym/build_sft_dataset.py \
   --run-root "$SMOKE/oc" --registry $REG \
   --requests "$SMOKE/logs/oc-requests.jsonl" --blob-dir "$SMOKE/logs/oc-blobs" \
   --out "$SMOKE/oc-sft.jsonl" --min-reward 0.0
 
 log "validating"
-$PY3 opencode_sft/clawgym/validate_sft.py --dataset "$SMOKE/mini-sft.jsonl" --registry $REG
-$PY3 opencode_sft/clawgym/validate_sft.py --dataset "$SMOKE/oc-sft.jsonl" --registry $REG
+$PY3 common/validate_sft.py --dataset "$SMOKE/mini-sft.jsonl" --registry $REG
+$PY3 common/validate_sft.py --dataset "$SMOKE/oc-sft.jsonl" --registry $REG
 
 log "the three keys"
 for f in "$SMOKE/mini-sft.jsonl" "$SMOKE/oc-sft.jsonl"; do

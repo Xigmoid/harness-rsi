@@ -15,7 +15,7 @@ dataset without guessing.
 Usage::
 
     python opencode_sft/run_rollouts.py \
-        --registry opencode_sft/registry \
+        --registry work/registry \
         --run-root runs/opencode-sft-full \
         --batch-size 200 --concurrency 16
 
@@ -38,9 +38,16 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-from minimax import read_key
-from docker_cleanup import kill_stale_jobs, remove_stale_containers
-from shared_network import ensure_shared_network, remove_leaked_networks
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from common.minimax import read_key  # noqa: E402
+from common.docker_cleanup import (  # noqa: E402
+    kill_stale_jobs,
+    remove_stale_containers,
+)
+from common.shared_network import (  # noqa: E402
+    ensure_shared_network,
+    remove_leaked_networks,
+)
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
@@ -115,7 +122,7 @@ def load_manifest_file(path: Path) -> list[dict[str, Any]]:
 
     The two harnesses each get half of every dataset, and the half is
     written as its own manifest (``manifest-mini.jsonl``,
-    ``manifest-opencode.jsonl``) by ``opencode_sft/split_tasks.py``.  The
+    ``manifest-opencode.jsonl``) by ``common/split_tasks.py``.  The
     driver then runs one of them, so the split is honoured by the task list
     rather than by a filter applied afterwards.
     """
@@ -402,8 +409,10 @@ def _batch_of(run_root: Path, trial_dir: Path) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--registry", default=str(HERE / "registry"))
-    parser.add_argument("--run-root", default=str(REPO / "runs" / "opencode-sft-full"))
+    parser.add_argument("--registry", default=str(REPO / "work" / "registry"))
+    parser.add_argument(
+        "--run-root", default=str(Path.home() / ".rsi-harbor" / "openthoughts-opencode")
+    )
     parser.add_argument("--batch-size", type=int, default=200)
     parser.add_argument("--concurrency", type=int, default=16)
     parser.add_argument("--families", default="swesmith,issue,tezos,superuser")
@@ -441,7 +450,7 @@ def main() -> int:
         help="run only the tasks in this manifest file, instead of the "
         "registry's manifest.jsonl.  The two harnesses each get half of "
         "every dataset, and the halves are manifest files written by "
-        "opencode_sft/split_tasks.py.",
+        "common/split_tasks.py.",
     )
     parser.add_argument(
         "--api-base",

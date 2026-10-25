@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!--
-  The full re-annotation, as a launchd agent.
+  The opencode driver, as a launchd agent.
 
   The driver runs the Harbor job in batches and writes every finished trial
   to a ledger, so a restart picks up where it left off.  It is a launchd
@@ -12,12 +12,25 @@
   The driver itself is restartable -- it reads the ledger before it starts
   and skips what is already done -- so ``KeepAlive`` is safe here.
 
+  **This is the OpenThoughts half.**  The ClawGym half is run by the
+  orchestrator (``common/run_all_stages.sh``), which supervises both
+  harnesses; installing this plist alongside it would run the same tasks
+  twice.
+
   Install and start it with::
 
+      # 1. put your own paths in: the repository, and the run root
+      sed -i '' "s|/path/to/harness-rsi|$PWD|g; s|/path/to/rsi-harbor|$HOME/.rsi-harbor|g" \
+          opencode_sft/launchd/com.rsi.opencode.rollouts.plist
+      # 2. install it
       cp opencode_sft/launchd/com.rsi.opencode.rollouts.plist ~/Library/LaunchAgents/
       launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.rsi.opencode.rollouts.plist
 
-  The log is at /private/tmp/oc-rollouts.log.
+  The paths in this file are **placeholders**: a launchd agent needs absolute
+  paths, and a repository cannot know where it was cloned to.
+
+  The run root has to **survive a reboot**: macOS wipes /private/tmp on every
+  boot, and a multi-day run does not survive losing its ledger.
 -->
 <plist version="1.0">
 <dict>
@@ -26,29 +39,46 @@
 
   <key>ProgramArguments</key>
   <array>
-    <string>/Users/djx/Documents/CodesProject/harness-rsi/.venv312/bin/python</string>
-    <string>/Users/djx/Documents/CodesProject/harness-rsi/opencode_sft/run_rollouts.py</string>
+    <string>/path/to/harness-rsi/.venv312/bin/python</string>
+    <string>/path/to/harness-rsi/opencode_sft/run_rollouts.py</string>
     <string>--registry</string>
-    <string>/Users/djx/Documents/CodesProject/harness-rsi/opencode_sft/registry</string>
+    <string>/path/to/harness-rsi/work/registry</string>
+    <string>--manifest</string>
+    <string>/path/to/harness-rsi/work/registry/manifest-opencode.jsonl</string>
     <string>--run-root</string>
-    <string>/Users/djx/Documents/CodesProject/harness-rsi/runs/opencode-sft-full</string>
+    <string>/path/to/rsi-harbor/openthoughts-opencode</string>
+    <string>--families</string>
+    <string>issue,tezos,superuser</string>
     <string>--batch-size</string>
-    <string>200</string>
+    <string>50</string>
     <string>--concurrency</string>
-    <string>12</string>
+    <string>10</string>
+    <string>--shuffle-seed</string>
+    <string>20261024</string>
+    <string>--resync-ledger</string>
+    <string>--proxy-check-url</string>
+    <string>http://127.0.0.1:8910/v1/models</string>
+    <string>--api-base</string>
+    <string>http://host.docker.internal:8910/v1</string>
+    <string>--api-key</string>
+    <string>EMPTY</string>
+    <string>--model-id</string>
+    <string>glm5.3-flash</string>
+    <string>--provider-id</string>
+    <string>rsi_glm</string>
   </array>
 
   <key>WorkingDirectory</key>
-  <string>/Users/djx/Documents/CodesProject/harness-rsi</string>
+  <string>/path/to/harness-rsi</string>
 
   <key>EnvironmentVariables</key>
   <dict>
     <key>PYTHONPATH</key>
-    <string>/Users/djx/Documents/CodesProject/harness-rsi</string>
+    <string>/path/to/harness-rsi</string>
     <key>PATH</key>
     <string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
     <key>DOCKER_HOST</key>
-    <string>unix:///Users/djx/.docker/run/docker.sock</string>
+    <string>unix:///path/to/.docker/run/docker.sock</string>
   </dict>
 
   <key>RunAtLoad</key>
@@ -57,8 +87,8 @@
   <true/>
 
   <key>StandardOutPath</key>
-  <string>/private/tmp/oc-rollouts.log</string>
+  <string>/path/to/rsi-harbor/logs/oc-rollouts.log</string>
   <key>StandardErrorPath</key>
-  <string>/private/tmp/oc-rollouts.err</string>
+  <string>/path/to/rsi-harbor/logs/oc-rollouts.err</string>
 </dict>
 </plist>

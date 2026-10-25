@@ -73,11 +73,12 @@ from pathlib import Path
 from typing import Any
 
 HERE = Path(__file__).resolve().parent
+REPO = HERE.parent
 
 import sys as _sys
 
 _sys.path.insert(0, str(HERE.parent))
-from opencode_sft.schema import (  # noqa: E402
+from common.schema import (  # noqa: E402
     DATASET_OPENTHOUGHT,
     HARNESS_OPENCODE,
     canonical_model,
@@ -875,12 +876,12 @@ def main() -> int:
     )
     parser.add_argument(
         "--task-index",
-        default=str(HERE / "tasks" / "index.jsonl"),
+        default=str(REPO / "work" / "tasks" / "index.jsonl"),
         help="the extracted task index, for the source-row metadata",
     )
     parser.add_argument(
         "--manifest",
-        default=str(HERE / "registry" / "manifest.jsonl"),
+        default=str(REPO / "work" / "registry" / "manifest.jsonl"),
         help="the registry manifest, for the trial -> dataset row mapping",
     )
     parser.add_argument(

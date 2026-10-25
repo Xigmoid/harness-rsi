@@ -62,15 +62,15 @@ print("downloaded", path)
 PY
 
   log "ClawGym: building the registry"
-  $PY3 opencode_sft/clawgym/build_registry.py \
+  $PY3 common/registry/build_clawgym_registry.py \
     --jsonl "$CACHE/clawgym/syn_task.jsonl" \
-    --out opencode_sft/registry_clawgym \
+    --out work/registry_clawgym \
     --clean
 
   log "ClawGym: writing the split manifests"
-  $PY3 opencode_sft/split_tasks.py \
-    --registry opencode_sft/registry_clawgym \
-    --report opencode_sft/clawgym/split_report.json
+  $PY3 common/split_tasks.py \
+    --registry work/registry_clawgym \
+    --report common/registry/split_report.json
 }
 
 # --------------------------------------------------------------------------- #
@@ -78,20 +78,20 @@ PY
 # --------------------------------------------------------------------------- #
 build_openthoughts() {
   log "OpenThoughts: extracting the tasks and their instructions from $OT_REPO"
-  $PY3 opencode_sft/extract_tasks.py \
+  $PY3 common/registry/extract_tasks.py \
     --repo "$OT_REPO" \
-    --out opencode_sft/tasks \
+    --out work/tasks \
     --clean
 
   log "OpenThoughts: building the registry"
   # Only the three families that are re-annotated here.  The SWE-Smith
   # family needs the per-instance SWE-Smith images and mirror caches, and
   # it is not part of this re-annotation.
-  $PY3 opencode_sft/build_registry.py \
-    --instructions opencode_sft/tasks/instructions \
-    --index opencode_sft/tasks/index.jsonl \
+  $PY3 common/registry/build_registry.py \
+    --instructions work/tasks/instructions \
+    --index work/tasks/index.jsonl \
     --families issue,tezos,superuser \
-    --out opencode_sft/registry \
+    --out work/registry \
     --clean
 
   log "OpenThoughts: one shared Docker network for every trial"
@@ -100,14 +100,14 @@ build_openthoughts() {
   # wide, so without this the pool is exhausted after a few dozen trials
   # and *every* new trial dies with "all predefined address pools have been
   # fully subnetted" -- which looks like an agent failure and is not one.
-  $PY3 opencode_sft/add_shared_network_compose.py \
-    --registry opencode_sft/registry \
+  $PY3 common/add_shared_network_compose.py \
+    --registry work/registry \
     --families issue,tezos,superuser
 
   log "OpenThoughts: writing the split manifests"
-  $PY3 opencode_sft/split_tasks.py \
-    --registry opencode_sft/registry --families issue,tezos,superuser \
-    --report opencode_sft/split_report_openthoughts.json
+  $PY3 common/split_tasks.py \
+    --registry work/registry --families issue,tezos,superuser \
+    --report common/split_report_openthoughts.json
 }
 
 case "$which" in

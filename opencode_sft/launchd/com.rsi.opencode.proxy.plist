@@ -13,14 +13,30 @@
 
   Install and start it with::
 
+      # 1. put your own paths in: the repository, and the run root
+      sed -i '' "s|/path/to/harness-rsi|$PWD|g; s|/path/to/rsi-harbor|$HOME/.rsi-harbor|g" \
+          opencode_sft/launchd/com.rsi.opencode.proxy.plist
+      # 2. install it
       cp opencode_sft/launchd/com.rsi.opencode.proxy.plist ~/Library/LaunchAgents/
       launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.rsi.opencode.proxy.plist
 
-  The request log and the agent's own logs live **inside the repository**
-  (runs/opencode-sft-full/requests/), not in /private/tmp: the host rebooted
-  once during the pilot and took the whole /private/tmp tree with it, which
-  cost the captured system prompts and tool schemas of every trial that had
-  run so far.
+  The paths in this file are **placeholders**: a launchd agent needs absolute
+  paths, and a repository cannot know where it was cloned to.
+
+  **The pipeline does not need this agent.**  ``common/run_all_stages.sh``
+  starts the proxy itself, on ``PROXY_PORT`` (8910 by default), and the two
+  opencode streams talk to that one.  This plist is for the case where the
+  proxy has to be up on its own -- for instance while a single trial is being
+  captured by hand.
+
+  The port below is deliberately **not** 8910: the orchestrator's proxy owns
+  that port, and two proxies appending to the same request log would
+  interleave their writes.  Give this one its own port and its own log.
+
+  The request log lives under the run root, not in /private/tmp: the host
+  rebooted once during the pilot and took the whole /private/tmp tree with it,
+  which cost the captured system prompts and tool schemas of every trial that
+  had run so far.
 -->
 <plist version="1.0">
 <dict>
@@ -29,8 +45,8 @@
 
   <key>ProgramArguments</key>
   <array>
-    <string>/Users/djx/Documents/CodesProject/harness-rsi/.venv312/bin/python</string>
-    <string>/Users/djx/Documents/CodesProject/harness-rsi/opencode_sft/record_proxy.py</string>
+    <string>/path/to/harness-rsi/.venv312/bin/python</string>
+    <string>/path/to/harness-rsi/common/record_proxy.py</string>
     <string>--host</string>
     <string>0.0.0.0</string>
     <string>--port</string>
@@ -38,13 +54,15 @@
     <string>--upstream</string>
     <string>http://YOUR-ENDPOINT:PORT/v1</string>
     <string>--out</string>
-    <string>/Users/djx/Documents/CodesProject/harness-rsi/runs/opencode-sft-full/requests/oc-requests.jsonl</string>
+    <string>/path/to/rsi-harbor/logs/oc-requests-standalone.jsonl</string>
     <string>--compact</string>
     <string>--dedupe</string>
+    <string>--blob-dir</string>
+    <string>/path/to/rsi-harbor/logs/oc-blobs-standalone</string>
   </array>
 
   <key>WorkingDirectory</key>
-  <string>/Users/djx/Documents/CodesProject/harness-rsi</string>
+  <string>/path/to/harness-rsi</string>
 
   <key>RunAtLoad</key>
   <true/>
@@ -52,8 +70,8 @@
   <true/>
 
   <key>StandardOutPath</key>
-  <string>/Users/djx/Documents/CodesProject/harness-rsi/runs/opencode-sft-full/requests/oc-proxy.log</string>
+  <string>/path/to/rsi-harbor/logs/oc-proxy.log</string>
   <key>StandardErrorPath</key>
-  <string>/Users/djx/Documents/CodesProject/harness-rsi/runs/opencode-sft-full/requests/oc-proxy.err</string>
+  <string>/path/to/rsi-harbor/logs/oc-proxy.err</string>
 </dict>
 </plist>

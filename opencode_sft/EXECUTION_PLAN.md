@@ -154,7 +154,10 @@
 | 端点在并发 32 时 p50 6.4s 但有 65s 长尾 | 长尾任务撞 1800s 超时 | 并发 24，step_limit 30 |
 | 任务提示里写着 "Do not write under reward/" | 说明 verifier 对 agent 可见，agent 会去读评分器 | 转换阶段过滤：assistant 轮里碰过 `reward/` 的轨迹一律剔除 |
 | `mini -c` 是整份替换 | 配置悄悄丢了 system/instance template | `-c local.yaml -c 覆盖层.yaml` 全量带上 |
-| Harbor 输出目录在 macOS 只能是 `/private/tmp` | 项目目录和 `/tmp` 都不行 | run-root 固定 `/private/tmp/rsi-harbor/...` |
+| Harbor 的 job 输出目录在 macOS 只能是 `/private/tmp` | 项目目录和 `/tmp` 都不行（`/tmp` 是指向 `/private` 的软链，VM 里看不见） | trial 输出留在 `/private/tmp/...`；但**run-root 本身**放到持久路径 `~/.rsi-harbor` |
+| run-root 放在 `/private/tmp` | macOS 每次开机清空 `/tmp` → 591 个已完成的 trial、两个 ledger、全部抓包一起没了（约 6% 进度），且没有任何报错 | run-root 默认 `$HOME/.rsi-harbor`；Harbor 每次 trial 结束即 `docker compose down`，容器不占地方，但 ledger 和 trial 目录会 |
+| 宿主机一次性的重 I/O 会饿死 VM 里的 agent | 2026-10-25 13:55–14:06，两条流同时整批失败：mini 报 `NetworkConnectionError`（`Connection refused`），opencode 报 `ApiConnectionClosedError`，35 个 trial 作废；而同一时刻宿主对端点 `/v1/models` 返回 200、40 条并发 TCP 连接全部成功。宿主 load average 当时是 125–140（10 核），而这段时间正好在做 2,833 个文件的 `git rm` 和全树 `grep`（该时间窗内有 28 个 git object 落盘）——**高度相关，但未经单变量复现** | 标注跑着的时候**不要**在宿主上做大范围文件操作；失败的任务由 driver 自动重跑（每个任务最多 3 次），不用手动补 |
+| 一条 batch 只在**整批跑完后**才写 ledger | 中途重启会把这批已完成的 trial 全重跑一遍 | 加重试前从 `result.json` 反推 ledger（`--resync-ledger`），两个 driver 都支持 |
 | Dockerfile 里 `ARG` 放在 apt 层之前 | ARG 改掉后面所有层的 cache key → apt 层整个重下 → 撞上镜像源瞬时故障 | `ARG` 声明放在用到它的那一层前面 |
 | opencode 的 `tool_calls.arguments` 是 JS `JSON.stringify` | Python `json.dumps` 默认在 `:` `,` 后加空格 → 语义等价但 token 序列不同，训练数据不是模型见过的字节 | `separators=(",", ":")` |
 | opencode 的 reasoning 是独立字段 | 折进 content 会让样本「读起来一样」但 token 不一样 | `messages` 视图保留 `reasoning_content`；`conversations` 视图才折成 `<think>` |

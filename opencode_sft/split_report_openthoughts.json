@@ -1,0 +1,28 @@
+{
+  "registry": "/Users/djx/Documents/CodesProject/harness-rsi/opencode_sft/registry",
+  "total": 23225,
+  "sides": {
+    "mini": {
+      "tasks": 11613,
+      "by_family": {
+        "issue": 4136,
+        "superuser": 3839,
+        "tezos": 3638
+      },
+      "distinct_skills": 0
+    },
+    "opencode": {
+      "tasks": 11612,
+      "by_family": {
+        "issue": 4238,
+        "superuser": 3815,
+        "tezos": 3559
+      },
+      "distinct_skills": 0
+    }
+  },
+  "skill_overlap": {
+    "skills_in_both": 0,
+    "skills_in_one_side_only": 0
+  }
+}

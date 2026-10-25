@@ -1,0 +1,143 @@
+agent:
+  agent_class: rsi.rhi_agent.RhiAgent
+  system_template: __RHI_RENDERED__
+  instance_template: __RHI_RENDERED__
+  step_limit: 0
+  cost_limit: 3.0
+  wall_time_limit_seconds: 3600
+  max_consecutive_format_errors: 3
+  output_path: null
+model:
+  model_name: openai/glm5.3-flash
+  model_kwargs:
+    temperature: 0.0
+    seed: 1234
+    drop_params: true
+    api_base: http://YOUR-ENDPOINT:PORT/v1
+    api_key: EMPTY
+    extra_body:
+      chat_template_kwargs:
+        reasoning_effort: low
+    max_tokens: 2560
+  cost_tracking: ignore_errors
+  observation_template: '{%- if output.exception_info -%}
+
+    <exception>{{output.exception_info}}</exception>
+
+    {% endif -%}
+
+    <returncode>{{output.returncode}}</returncode>
+
+    {%- if output.output | length < observation_max_chars -%}
+
+    <output>
+
+    {{ output.output -}}
+
+    </output>
+
+    {%- else -%}
+
+    <warning>
+
+    The output of your last command was too long.
+
+    Please try a different command that produces less output.
+
+    If you''re looking for a file you can try use head, tail or sed to view a smaller
+    number of lines selectively.
+
+    If you have a lot of output you can redirect it to a file and then search in that
+    file.
+
+    </warning>
+
+    {%- set elided_chars = output.output | length - observation_max_chars -%}
+
+    <output_head>
+
+    {{ output.output[:observation_max_chars // 2] }}
+
+    </output_head>
+
+    <elided_chars>
+
+    {{ elided_chars }} characters elided
+
+    </elided_chars>
+
+    <output_tail>
+
+    {{ output.output[-observation_max_chars // 2:] }}
+
+    </output_tail>
+
+    {%- endif -%}
+
+    '
+  format_error_template: '{% if finish_reason is defined and finish_reason in ["length",
+    "tool_calls"] -%}
+
+    Your previous response reached the output token limit (finish_reason={{ finish_reason
+    }}) before it produced a complete action, so it was cut off. Respond more concisely
+    and provide exactly one action in the required format. If you need to think more,
+    do so briefly.
+
+    {%- else -%}
+
+    Format error:
+
+
+    <error>
+
+    {{error}}
+
+    </error>
+
+
+    Here is general guidance on how to format your response:
+
+
+    Please always provide EXACTLY ONE action in triple backticks, found {{actions|length}}
+    actions.
+
+
+    Please format your action in triple backticks as shown in <response_example>.
+
+
+    <response_example>
+
+    Here are some thoughts about why you want to perform the action.
+
+
+    ```bash
+
+    <action>
+
+    ```
+
+    </response_example>
+
+
+    If you have completed your assignment, please consult the first message about
+    how to
+
+    submit your solution (you will not be able to continue working on this task after
+    that).
+
+    {%- endif -%}
+
+    '
+  model_class: litellm_textbased
+  action_regex: '```(?:mswea_bash_command|bash|sh|shell)?\s*\n(.*?)\n```'
+environment:
+  environment_class: local
+  image: python:3.11-slim
+  cwd: /app
+  timeout: 120
+  env:
+    PAGER: cat
+    MANPAGER: cat
+    LESS: -R
+    PIP_PROGRESS_BAR: 'off'
+    TQDM_DISABLE: '1'

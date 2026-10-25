@@ -1,0 +1,64 @@
+# --------------------------------------------------------------------------- #
+# Secrets and local configuration
+# --------------------------------------------------------------------------- #
+# The MiniMax API key.  It is *never* needed for the default (GLM-only) run;
+# it exists because the second provider was wired in and may be used again.
+# It is read by the recording proxy, which injects it on the way out, so the
+# key never reaches a job file or a trial log.
+MINIMAX_KEY.txt
+.env
+*.key
+*.pem
+
+# --------------------------------------------------------------------------- #
+# Python environments and caches
+# --------------------------------------------------------------------------- #
+.venv/
+.venv310/
+.venv312/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+build/
+dist/
+
+# --------------------------------------------------------------------------- #
+# Generated task registries
+# --------------------------------------------------------------------------- #
+# Both registries are **rebuilt from public HuggingFace datasets**:
+#
+#   RUC-AIBOX/ClawGym-Task                 -> syn_task.jsonl
+#   open-thoughts/OpenThoughts-Agent-SFT-31.6K -> train.parquet
+#
+# ``make registry`` does the download and the build, so these do not belong
+# in git: 1.3 GB of task directories that anybody can regenerate in minutes.
+opencode_sft/registry/
+opencode_sft/registry_clawgym/
+opencode_sft/tasks/
+.cache/
+
+# --------------------------------------------------------------------------- #
+# Run outputs
+# --------------------------------------------------------------------------- #
+# Trial directories, ledgers, converted datasets: all of it is produced by a
+# run and is not source.
+runs/
+ledger/
+datasets/registry/
+opencode_sft/pilot/
+opencode_sft/random_probe/
+opencode_sft/dataset/
+opencode_sft/mini_sft/dataset/
+opencode_sft/clawgym/dataset/
+opencode_sft/clawgym/invalid/
+*.jsonl.gz
+
+# --------------------------------------------------------------------------- #
+# macOS noise
+# --------------------------------------------------------------------------- #
+.DS_Store
+.AppleDouble
+._*

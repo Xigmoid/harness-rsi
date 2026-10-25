@@ -1,0 +1,23 @@
+"""Verifier for one IFEval prompt (strict accuracy: every instruction must hold)."""
+
+import sys
+
+sys.path.insert(0, "/tests")
+
+from rsi.ifeval_checkers import check_prompt  # noqa: E402
+
+PROMPT = 'Expand the following and make it funny: Jeanne has rolled the dice. She thought she lost, but actually she won.\n\nItalicize at least 10 text parts with markdown (using * to italicize, like *italic text*).\nDo not use any commas in your response.'
+INSTRUCTION_IDS = ['detectable_format:number_highlighted_sections', 'punctuation:no_comma']
+KWARGS = [{'num_highlights': 10}, {}]
+
+
+def test_response_follows_every_instruction():
+    try:
+        with open("/app/response.txt", encoding="utf-8") as handle:
+            response = handle.read()
+    except FileNotFoundError:
+        raise AssertionError("/app/response.txt was not written by the agent")
+    assert response.strip(), "/app/response.txt is empty"
+    results = check_prompt(PROMPT, response, INSTRUCTION_IDS, KWARGS)
+    failed = [k for k, ok in results.items() if not ok]
+    assert not failed, f"instructions not followed: {failed} (all: {results})"

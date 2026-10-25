@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  The recording proxy, as a launchd agent.
+
+  The proxy is the only way to capture opencode's system prompt and tool
+  schemas: they are baked into the opencode binary and are not exposed by
+  ``opencode debug agent``, so the request itself is the ground truth.
+
+  A launchd agent rather than a shell background job, because the full
+  re-annotation runs for days: a process started from a tool call dies with
+  it, and a proxy that is down makes every trial in flight fail.
+
+  Install and start it with::
+
+      cp opencode_sft/launchd/com.rsi.opencode.proxy.plist ~/Library/LaunchAgents/
+      launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.rsi.opencode.proxy.plist
+
+  The request log and the agent's own logs live **inside the repository**
+  (runs/opencode-sft-full/requests/), not in /private/tmp: the host rebooted
+  once during the pilot and took the whole /private/tmp tree with it, which
+  cost the captured system prompts and tool schemas of every trial that had
+  run so far.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.rsi.opencode.proxy</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/djx/Documents/CodesProject/harness-rsi/.venv312/bin/python</string>
+    <string>/Users/djx/Documents/CodesProject/harness-rsi/opencode_sft/record_proxy.py</string>
+    <string>--host</string>
+    <string>0.0.0.0</string>
+    <string>--port</string>
+    <string>8899</string>
+    <string>--upstream</string>
+    <string>http://YOUR-ENDPOINT:PORT/v1</string>
+    <string>--out</string>
+    <string>/Users/djx/Documents/CodesProject/harness-rsi/runs/opencode-sft-full/requests/oc-requests.jsonl</string>
+    <string>--compact</string>
+    <string>--dedupe</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/djx/Documents/CodesProject/harness-rsi</string>
+
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/djx/Documents/CodesProject/harness-rsi/runs/opencode-sft-full/requests/oc-proxy.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/djx/Documents/CodesProject/harness-rsi/runs/opencode-sft-full/requests/oc-proxy.err</string>
+</dict>
+</plist>

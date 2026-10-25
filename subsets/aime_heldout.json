@@ -1,0 +1,28 @@
+{
+  "benchmark": "aime",
+  "name": "aime_heldout",
+  "seed": 20260715,
+  "sha256": "3b8079fb0966a27dfe9a0be1f7a47bb257ef7030dc2b67f8796634fc21b0881e",
+  "source": "path",
+  "split": "heldout",
+  "task_ids": [
+    "aime_62",
+    "aime_65",
+    "aime_67",
+    "aime_68",
+    "aime_70",
+    "aime_72",
+    "aime_76",
+    "aime_80",
+    "aime_87",
+    "aime_i-10",
+    "aime_i-6",
+    "aime_i-7",
+    "aime_ii-1",
+    "aime_ii-10",
+    "aime_ii-11",
+    "aime_ii-12",
+    "aime_ii-3",
+    "aime_ii-8"
+  ]
+}

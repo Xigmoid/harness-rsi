@@ -1,0 +1,144 @@
+agent:
+  agent_class: rsi.rhi_agent.RhiAgent
+  cost_limit: 3.0
+  instance_template: __RHI_RENDERED__
+  max_consecutive_format_errors: 3
+  output_path: null
+  step_limit: 0
+  system_template: __RHI_RENDERED__
+  wall_time_limit_seconds: 3600
+environment:
+  container_timeout: 2h
+  cwd: /
+  env:
+    LESS: -R
+    MANPAGER: cat
+    PAGER: cat
+    PIP_PROGRESS_BAR: 'off'
+    TQDM_DISABLE: '1'
+  environment_class: docker
+  forward_env: []
+  image: python:3.11-slim
+  timeout: 120
+model:
+  action_regex: '```(?:mswea_bash_command|bash|sh|shell)?\s*\n(.*?)\n```'
+  cost_tracking: ignore_errors
+  format_error_template: '{% if finish_reason is defined and finish_reason in ["length",
+    "tool_calls"] -%}
+
+    Your previous response reached the output token limit (finish_reason={{ finish_reason
+    }}) before it produced a complete action, so it was cut off. Respond more concisely
+    and provide exactly one action in the required format. If you need to think more,
+    do so briefly.
+
+    {%- else -%}
+
+    Format error:
+
+
+    <error>
+
+    {{error}}
+
+    </error>
+
+
+    Here is general guidance on how to format your response:
+
+
+    Please always provide EXACTLY ONE action in triple backticks, found {{actions|length}}
+    actions.
+
+
+    Please format your action in triple backticks as shown in <response_example>.
+
+
+    <response_example>
+
+    Here are some thoughts about why you want to perform the action.
+
+
+    ```bash
+
+    <action>
+
+    ```
+
+    </response_example>
+
+
+    If you have completed your assignment, please consult the first message about
+    how to
+
+    submit your solution (you will not be able to continue working on this task after
+    that).
+
+    {%- endif -%}
+
+    '
+  model_class: litellm_textbased
+  model_kwargs:
+    api_base: http://YOUR-ENDPOINT:PORT/v1
+    api_key: EMPTY
+    drop_params: true
+    extra_body:
+      chat_template_kwargs:
+        reasoning_effort: low
+    seed: 1234
+    temperature: 0.0
+  model_name: openai/glm5.3-flash
+  observation_template: '{%- if output.exception_info -%}
+
+    <exception>{{output.exception_info}}</exception>
+
+    {% endif -%}
+
+    <returncode>{{output.returncode}}</returncode>
+
+    {%- if output.output | length < observation_max_chars -%}
+
+    <output>
+
+    {{ output.output -}}
+
+    </output>
+
+    {%- else -%}
+
+    <warning>
+
+    The output of your last command was too long.
+
+    Please try a different command that produces less output.
+
+    If you''re looking for a file you can try use head, tail or sed to view a smaller
+    number of lines selectively.
+
+    If you have a lot of output you can redirect it to a file and then search in that
+    file.
+
+    </warning>
+
+    {%- set elided_chars = output.output | length - observation_max_chars -%}
+
+    <output_head>
+
+    {{ output.output[:observation_max_chars // 2] }}
+
+    </output_head>
+
+    <elided_chars>
+
+    {{ elided_chars }} characters elided
+
+    </elided_chars>
+
+    <output_tail>
+
+    {{ output.output[-observation_max_chars // 2:] }}
+
+    </output_tail>
+
+    {%- endif -%}
+
+    '

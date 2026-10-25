@@ -1,0 +1,43 @@
+# Override block for the local vLLM endpoint (glm5.3-flash).
+#
+# This file is NOT used directly by mini-swe-agent. It is merged on top of the
+# built-in `mini.yaml` by `regen.py`, which produces the self-contained
+# `local-glm.yaml`. Edit THIS file, then re-run regen.py.
+
+model:
+  model_name: openai/glm5.3-flash
+  # The endpoint emits native OpenAI tool calls, so the modern toolcall model
+  # class works.
+  # Fallback if the server ever loses --enable-auto-tool-choice:
+  #   model_class: litellm_textbased
+  #   + model.action_regex: '```(?:mswea_bash_command|bash|sh|shell)?\s*\n(.*?)\n```'
+  model_class: litellm
+  # glm5.3-flash is not in litellm's price table -> never hard-fail on cost.
+  # (Also required on litellm>=1.106: mini-swe-agent calls
+  #  completion_cost(response=...) but that kwarg was renamed to
+  #  completion_response, so cost tracking raises for *every* model.)
+  cost_tracking: ignore_errors
+  model_kwargs:
+    api_base: http://YOUR-ENDPOINT:PORT/v1
+    api_key: dummy
+    temperature: 0
+    # GLM reasons before answering; a small budget truncates the reply
+    # before the tool call is emitted -> FormatError loops.
+    max_tokens: 8192
+    # `chat_template_kwargs` 会原样出现在 wire body 顶层（抓包实证）。
+    # litellm 会把 extra_body 里的未知键合并到 body 顶层，所以 extra_body
+    # 写法与顶层写法**完全等价**（受控实验：同一 prompt 各 3 次，reasoning
+    # 长度与 completion_tokens 逐条相同）。
+    # 早前"顶层传会被丢弃"的说法是单样本比较得出的误判，已纠正。
+    extra_body:
+      chat_template_kwargs:
+        reasoning_effort: low
+
+environment:
+  # The local endpoint can be slow to answer; give each bash command room
+  timeout: 120
+
+agent:
+  # Local endpoint -> cost is always 0, so the cost limit would never trip
+  cost_limit: 0.
+  step_limit: 0

@@ -1,0 +1,24 @@
+{
+  "registry": "/Users/djx/Documents/CodesProject/harness-rsi/opencode_sft/registry_clawgym",
+  "total": 15402,
+  "sides": {
+    "mini": {
+      "tasks": 7749,
+      "by_family": {
+        "clawgym": 7749
+      },
+      "distinct_skills": 3016
+    },
+    "opencode": {
+      "tasks": 7653,
+      "by_family": {
+        "clawgym": 7653
+      },
+      "distinct_skills": 2951
+    }
+  },
+  "skill_overlap": {
+    "skills_in_both": 120,
+    "skills_in_one_side_only": 5727
+  }
+}

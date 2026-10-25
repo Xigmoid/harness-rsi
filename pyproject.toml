@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rsi"
+version = "0.1.0"
+description = "Recursive harness self-improvement as a typed-configuration search, measured on benchmarks"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "RSI framework" }]
+keywords = ["agent", "harness", "self-improvement", "benchmark", "mini-swe-agent"]
+
+dependencies = [
+    # The execution kernel.  Pinned: runtime drift would contaminate the
+    # generation-to-generation differences (constraint C-2).
+    "mini-swe-agent==2.4.6",
+    "PyYAML>=6.0",
+    "numpy>=1.24",
+    "scipy>=1.10",
+]
+
+[project.optional-dependencies]
+# Harbor is the benchmark adapter.  It needs Python >= 3.12.
+harbor = ["harbor==0.24.0"]
+# The IFEval instruction checkers.  ``nltk`` additionally needs the punkt
+# models, which are a download and not a package:
+#   python -m nltk.downloader punkt punkt_tab
+ifeval = ["langdetect==1.0.9", "nltk==3.10.3"]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+rsi = "rsi.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["rsi*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["ignore::DeprecationWarning"]

@@ -1,0 +1,43 @@
+jobs_dir: /private/tmp/rsi-harbor
+n_attempts: 1
+n_concurrent_trials: 16
+timeout_multiplier: 1.0
+environment:
+  type: docker
+  delete: true
+  force_build: false
+retry:
+  max_retries: 3
+  include_exceptions:
+  - ApiRateLimitError
+  - ApiInternalServerError
+  - ApiOverloadedError
+  - ApiConnectionClosedError
+agents:
+- import_path: rsi.harbor_agent:RsiMiniSweAgent
+  name: rsi-mini-swe-agent
+  model_name: openai/glm5.3-flash
+  kwargs:
+    version: 2.4.6
+    config:
+      agent:
+        agent_class: rsi.rhi_agent.RhiAgent
+datasets:
+- path: /Users/djx/Documents/CodesProject/harness-rsi/datasets/ifeval
+  task_names:
+  - prompt-1000
+  - prompt-1001
+  - prompt-1019
+  - prompt-1021
+  - prompt-1051
+  - prompt-1075
+  - prompt-1082
+  - prompt-1094
+  - prompt-1108
+  - prompt-1127
+  - prompt-1128
+  - prompt-1129
+  - prompt-1130
+  - prompt-1131
+  - prompt-1132
+  - prompt-1139

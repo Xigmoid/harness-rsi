@@ -1,0 +1,67 @@
+# Validation job for the **family-shared base image** architecture.
+#
+# This is the production job (``job.opencode_sft_full.yaml``) pointed at a
+# small slice of the registry, so that the whole path -- the shared image,
+# the per-task setup script, the agent adapter, the recording proxy, the
+# converter and the verifier -- is exercised before 31,600 trials are
+# launched.
+#
+# Build the slice first::
+#
+#   python opencode_sft/build_registry.py \
+#       --out /private/tmp/rsi-registry-slice --limit-per-family 3 --clean
+#
+# then run it::
+#
+#   PYTHONPATH=. harbor job start -c harbor/job.opencode_sft_slice.yaml \
+#       -o /private/tmp/rsi-harbor/opencode-sft-slice --yes
+
+jobs_dir: /private/tmp/rsi-harbor/opencode-sft-slice
+n_attempts: 1
+n_concurrent_trials: 4
+timeout_multiplier: 1.0
+
+environment:
+  type: docker
+  delete: true
+  force_build: false
+
+verifier:
+  disable: true
+
+retry:
+  max_retries: 3
+  include_exceptions:
+  - ApiRateLimitError
+  - ApiInternalServerError
+  - ApiOverloadedError
+  - ApiConnectionClosedError
+
+agents:
+- import_path: rsi.opencode_agent:RsiOpenCode
+  name: rsi-opencode
+  model_name: rsi_glm/glm5.3-flash
+  override_timeout_sec: 1800
+  override_setup_timeout_sec: 1800
+  kwargs:
+    version: "1.18.33"
+    export_session: true
+    skip_install_if_present: true
+    opencode_config:
+      provider:
+        rsi_glm:
+          npm: "@ai-sdk/openai-compatible"
+          name: "RSI GLM endpoint"
+          options:
+            baseURL: "http://host.docker.internal:8899/v1"
+            apiKey: "EMPTY"
+            setCacheKey: true
+          models:
+            glm5.3-flash:
+              name: "glm5.3-flash"
+
+datasets:
+- path: /private/tmp/rsi-registry-slice/swesmith
+- path: /private/tmp/rsi-registry-slice/issue
+- path: /private/tmp/rsi-registry-slice/tezos
+- path: /private/tmp/rsi-registry-slice/superuser

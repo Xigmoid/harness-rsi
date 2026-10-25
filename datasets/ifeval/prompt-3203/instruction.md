@@ -1,0 +1,4 @@
+May name is Naomi. Write a blog post in my name for the canucks hockey team about why they need to be more mindful about their environments. End the blog post with "Naomi thanks you for reading." No other words should follow this phrase. This phrase should be the very end of your entire response.
+
+Write your complete answer to the file `/app/response.txt`.
+The file must contain the answer and nothing else.

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  The full re-annotation, as a launchd agent.
+
+  The driver runs the Harbor job in batches and writes every finished trial
+  to a ledger, so a restart picks up where it left off.  It is a launchd
+  agent rather than a shell background job because the run takes days: a
+  process started from a tool call dies with it, and this one has to
+  survive a closed terminal, a cancelled shell and a reboot.
+
+  The driver itself is restartable -- it reads the ledger before it starts
+  and skips what is already done -- so ``KeepAlive`` is safe here.
+
+  Install and start it with::
+
+      cp opencode_sft/launchd/com.rsi.opencode.rollouts.plist ~/Library/LaunchAgents/
+      launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.rsi.opencode.rollouts.plist
+
+  The log is at /private/tmp/oc-rollouts.log.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.rsi.opencode.rollouts</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/djx/Documents/CodesProject/harness-rsi/.venv312/bin/python</string>
+    <string>/Users/djx/Documents/CodesProject/harness-rsi/opencode_sft/run_rollouts.py</string>
+    <string>--registry</string>
+    <string>/Users/djx/Documents/CodesProject/harness-rsi/opencode_sft/registry</string>
+    <string>--run-root</string>
+    <string>/Users/djx/Documents/CodesProject/harness-rsi/runs/opencode-sft-full</string>
+    <string>--batch-size</string>
+    <string>200</string>
+    <string>--concurrency</string>
+    <string>12</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/djx/Documents/CodesProject/harness-rsi</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PYTHONPATH</key>
+    <string>/Users/djx/Documents/CodesProject/harness-rsi</string>
+    <key>PATH</key>
+    <string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    <key>DOCKER_HOST</key>
+    <string>unix:///Users/djx/.docker/run/docker.sock</string>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+
+  <key>StandardOutPath</key>
+  <string>/private/tmp/oc-rollouts.log</string>
+  <key>StandardErrorPath</key>
+  <string>/private/tmp/oc-rollouts.err</string>
+</dict>
+</plist>

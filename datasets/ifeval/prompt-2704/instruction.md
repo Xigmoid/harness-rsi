@@ -1,0 +1,4 @@
+Write a haiku about foolish behavior in the form of a question, for an audience of young readers. It should include the topic of not studying. Give exactly two different responses, separated by 6 asterisk symbols (******), and include a title wrapped in double angular brackets, i.e. <<title>>. Do not use commas.
+
+Write your complete answer to the file `/app/response.txt`.
+The file must contain the answer and nothing else.

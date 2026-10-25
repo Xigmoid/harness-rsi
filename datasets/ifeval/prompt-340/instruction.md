@@ -1,0 +1,4 @@
+Can you explain to me why there is so much fraud in the world? Please include one italic text section in markdown, i.e *italic text*. Make your entire response less than 30 words.
+
+Write your complete answer to the file `/app/response.txt`.
+The file must contain the answer and nothing else.

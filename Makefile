@@ -30,7 +30,11 @@ RUN_ROOT       ?= $(HOME)/.rsi-harbor
 # The families that are re-annotated.
 OT_FAMILIES ?= issue,tezos,superuser
 
-export PY3 PY MODEL_BASE_URL MODEL_NAME RUN_ROOT
+# Export only what the caller actually set.  The defaults above are
+# documentation: the environment wins over ``.env`` (the rule lives in
+# ``opencode_sft/load_env.sh``), so exporting a default would silently
+# override the endpoint and the run root that a researcher put in ``.env``.
+export $(foreach v,PY3 PY MODEL_BASE_URL MODEL_NAME RUN_ROOT,$(if $(filter command line environment,$(origin $(v))),$(v)))
 
 .PHONY: help setup images toolchain registry registry-clawgym registry-ot \
         annotate dataset verify check clean-outputs

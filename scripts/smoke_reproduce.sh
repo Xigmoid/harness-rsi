@@ -15,12 +15,11 @@ set -euo pipefail
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO"
 
-if [[ -f .env ]]; then
-  set -a
-  # shellcheck disable=SC1091
-  source .env
-  set +a
-fi
+# ``.env`` first, then the environment wins over it: a value that was already
+# set when this script started beats the file.  The rule lives in
+# ``opencode_sft/load_env.sh``, so that every script here reads its
+# configuration the same way.
+source "$REPO/opencode_sft/load_env.sh"
 
 PY3="${PY3:-$REPO/.venv/bin/python}"
 PY="${PY:-$REPO/.venv312/bin/python}"

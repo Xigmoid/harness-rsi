@@ -67,13 +67,9 @@ cd "$REPO"
 # --------------------------------------------------------------------------- #
 # configuration
 # --------------------------------------------------------------------------- #
-# ``.env`` first, then the environment wins over it.
-if [[ -f "$REPO/.env" ]]; then
-  set -a
-  # shellcheck disable=SC1091
-  source "$REPO/.env"
-  set +a
-fi
+# ``.env`` first, then the environment wins over it -- see load_env.sh.
+source "$REPO/opencode_sft/load_env.sh"
+# ---------------------------------------- #
 
 #: The endpoint the agents talk to, **as seen from inside the container**.
 MODEL_BASE_URL="${MODEL_BASE_URL:-http://host.docker.internal:8000/v1}"

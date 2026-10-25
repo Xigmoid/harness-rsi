@@ -195,6 +195,19 @@ variables that matter:
 and the trial log, so the real key is injected by the recording proxy on
 the way out, and the job file only ever holds the placeholder `EMPTY`.
 
+**The environment wins over `.env`.**  `.env` is a default, not an override:
+a value that was already in the environment when the script started beats
+the file, so
+
+```bash
+RUN_ROOT=/tmp/scratch make annotate      # runs in /tmp/scratch
+make annotate                             # runs in the run root from .env
+```
+
+do what they say.  The rule (and the list of variables it covers) lives in
+`opencode_sft/load_env.sh`, and every script that reads `.env` goes through
+it.
+
 ---
 
 ## 5. The traps this implementation already handles

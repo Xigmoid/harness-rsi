@@ -38,7 +38,7 @@ without it, so every request would die with ``ModuleNotFoundError: No module
 named 'mcp'`` and the run would look like a weak model rather than a missing
 dependency.
 
-Three deviations from ``harness/base_config.yaml``, all deliberate:
+Three deviations from ``base_config.yaml``, all deliberate:
 
 **The observation and format-error templates come from mini, not from the
 frozen base.**  The frozen ones are written for this project's ``RhiAgent``:
@@ -104,7 +104,7 @@ MINI_CONFIGS_IN_IMAGE = {
     ),
 }
 #: The frozen protocol section of the project.
-BASE_CONFIG = REPO / "harness" / "base_config.yaml"
+BASE_CONFIG = HERE / "base_config.yaml"
 
 #: The endpoint the rollouts talk to.
 API_BASE = os.environ.get("MODEL_BASE_URL", "http://YOUR-ENDPOINT:PORT/v1")
@@ -229,8 +229,8 @@ def build(
 
     agent = dict(builtin["agent"])
     # The packaged templates are the text-protocol ones.  The RhiAgent
-    # placeholders in base_config.yaml are for the RSI research agent, which
-    # renders its own prompts.
+    # placeholders were for the research agent, which renders its own
+    # prompts; the rollouts run mini's own templates.
     agent["mode"] = "default"
     # **The step limit is what stops the agent, and it has to be set.**
     #

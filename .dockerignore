@@ -1,19 +1,28 @@
+# The three images are built with the repository root as the context, and
+# none of them copies a file out of it: every one of them starts FROM a
+# public base image and installs what it needs.  The toolchain image used to
+# copy the `rsi` package into the bundle; it does not any more, because the
+# rollouts run mini in its default mode.
+#
+# What is left below is what would be *large* if it were sent: the task
+# registries (1.3 GB), the extracted tasks, the pilot registries and the
+# converted datasets.
 .venv
 .venv312
 .git
+.cache
 .pytest_cache
 *.egg-info
-runs
-ledger
-datasets
-subsets
-harness
-audit
-tests
 __pycache__
 *.pyc
 .DS_Store
+datasets/base
+opencode_sft/registry
+opencode_sft/registry_clawgym
 opencode_sft/tasks
 opencode_sft/pilot
 opencode_sft/dataset
-opencode_sft/__pycache__
+opencode_sft/mini_sft/dataset
+opencode_sft/clawgym/dataset
+runs
+ledger

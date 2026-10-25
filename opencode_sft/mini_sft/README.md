@@ -239,7 +239,7 @@ point release 有漂移（原版 3.10.20，tag 现在解析到 3.10.22），
 1. **`mini -c` 是整份替换** —— 一旦给了 `-c`，打包的 `config/mini.yaml` 就不再用。
    配置必须自带系统/实例模板，否则 agent 拿到空提示词。
 2. **冻结的 `observation_template` 在 plain mini 下会炸** ——
-   `harness/base_config.yaml` 里那份模板插值 `observation_max_chars`，
+   `base_config.yaml` 里那份模板插值 `observation_max_chars`，
    那是 `RhiAgent` 才提供的变量。plain mini 第一次工具调用就
    `UndefinedError: 'observation_max_chars' is undefined`。
    协议（围栏 + action_regex）保留，模板换成 mini 自带的那套。

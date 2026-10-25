@@ -77,7 +77,7 @@ Usage in the Harbor job file::
           version: "2.4.6"
           config:
             agent:
-              agent_class: rsi.rhi_agent.RhiAgent
+              mode: default
 """
 
 from __future__ import annotations
@@ -114,9 +114,12 @@ TOOLCHAIN_DIR = TOOLCHAIN_MOUNT_TARGET
 #: The mini-swe-agent entry point inside the bundle.
 TOOLCHAIN_BIN = f"{TOOLCHAIN_DIR}/bin/mini-swe-agent"
 
-#: Where the ``rsi`` package lives inside the bundle.  The agent class
-#: (``rsi.rhi_agent.RhiAgent``) and the inlined spec have to be importable
-#: from inside the isolated tool venv.
+#: Where the ``rsi`` package would live inside the bundle, if it were
+#: needed there.  It is not: the rollouts run mini in its default mode, and
+#: the adapter itself is imported by the *host* process that runs
+#: ``harbor job start``.  The directory is kept on the container's
+#: ``PYTHONPATH`` so that a bundle built from an older revision still finds
+#: the package it shipped with.
 RSI_PKG_DIR = f"{TOOLCHAIN_DIR}/rsi-pkg"
 
 #: Where the adapter records the effective command line inside the container.

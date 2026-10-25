@@ -5,38 +5,29 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "rsi"
 version = "0.1.0"
-description = "Recursive harness self-improvement as a typed-configuration search, measured on benchmarks"
+description = "Harbor adapters for the mini-swe-agent and opencode harnesses used by the SFT annotation"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
-authors = [{ name = "RSI framework" }]
-keywords = ["agent", "harness", "self-improvement", "benchmark", "mini-swe-agent"]
+authors = [{ name = "harness-rsi" }]
+keywords = ["agent", "harness", "sft", "mini-swe-agent", "opencode", "harbor"]
 
+# The package holds two Harbor adapters and nothing else:
+#
+#   rsi.harbor_agent   -- the mini-swe-agent adapter
+#   rsi.opencode_agent -- the opencode adapter
+#   rsi.paths          -- the paths the host and the container agree on
+#
+# The adapters subclass Harbor's own agents, so Harbor is the real dependency.
+# It needs Python >= 3.12 and therefore lives in the *driver* environment
+# (``.venv312``); the helper environment (``.venv``) installs the package
+# without it.
 dependencies = [
-    # The execution kernel.  Pinned: runtime drift would contaminate the
-    # generation-to-generation differences (constraint C-2).
-    "mini-swe-agent==2.4.6",
-    "PyYAML>=6.0",
-    "numpy>=1.24",
-    "scipy>=1.10",
+    "pydantic>=2.0",
 ]
 
 [project.optional-dependencies]
-# Harbor is the benchmark adapter.  It needs Python >= 3.12.
 harbor = ["harbor==0.24.0"]
-# The IFEval instruction checkers.  ``nltk`` additionally needs the punkt
-# models, which are a download and not a package:
-#   python -m nltk.downloader punkt punkt_tab
-ifeval = ["langdetect==1.0.9", "nltk==3.10.3"]
-dev = ["pytest>=7.0"]
-
-[project.scripts]
-rsi = "rsi.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["rsi*"]
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-addopts = "-q"
-filterwarnings = ["ignore::DeprecationWarning"]

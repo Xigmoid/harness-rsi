@@ -36,18 +36,21 @@ export PY3 PY MODEL_BASE_URL MODEL_NAME RUN_ROOT
         annotate dataset verify check clean-outputs
 
 help:
-	@sed -n '2,20p' $(MAKEFILE_LIST) | sed 's/^# \?//'
+	@sed -n '2,15p' $(MAKEFILE_LIST) | sed 's/^# \?//'
 
 # --------------------------------------------------------------------------- #
 # 0. the environment
 # --------------------------------------------------------------------------- #
 # Two interpreters, for two reasons:
 #
-#   .venv      the helper scripts: PyYAML, the HuggingFace hub client, and
-#              the project's own `rsi` package (it is imported by the
-#              Harbor adapters).
+#   .venv      the helper scripts: PyYAML, pyarrow (the parquet rollouts) and
+#              the HuggingFace hub client.
 #   .venv312   the drivers: Harbor 0.24.0 needs Python 3.12, and so does
 #              the mini harness that runs inside the trial containers.
+#
+# The `rsi` package (the two Harbor adapters) is installed into `.venv` as
+# well, but the drivers import it through `PYTHONPATH`, so a driver run from
+# a checkout that was never `pip install -ed` still works.
 setup:
 	python3 -m venv .venv
 	.venv/bin/pip install --upgrade pip

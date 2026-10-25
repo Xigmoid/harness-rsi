@@ -48,9 +48,8 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
       --with mcp \
  && mini-swe-agent --help
 
-# The rsi package has to be importable from inside the isolated tool venv:
-# the agent class is `rsi.rhi_agent.RhiAgent` and the spec is inlined into
-# the mini-swe-agent config.  It travels with the bundle so that *any* task
-# image can run the harness, not only the ones we baked.
-COPY rsi /root/.local/rsi-pkg/rsi
-COPY pyproject.toml /root/.local/rsi-pkg/pyproject.toml
+# Nothing else goes into the bundle: the rollouts run mini in its **default**
+# mode (the config has no ``agent_class``), so the harness is mini's own and
+# needs nothing from this repository inside the container.  The ``rsi``
+# package is a *host-side* Harbor adapter -- it is imported by the process
+# that runs ``harbor job start``, never by the trial container.

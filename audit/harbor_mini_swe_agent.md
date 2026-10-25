@@ -169,19 +169,17 @@ Two consequences for constraint C-2 (pin the runtime):
   (`kwargs: {version: "2.4.6"}`) — it is **not** pinned by default, and
   "latest" would change between generations;
 * the agent runs under **Python 3.12** inside the container, while the
-  framework itself may run under a different Python.  The host-side
-  `RhiAgent` class is *not* what executes in the container: the container
-  installs mini-swe-agent from PyPI and imports
-  `rsi.rhi_agent.RhiAgent` from there.  **The `rsi` package must therefore be
-  installed inside the task image** (or the class must be vendored into the
-  image) — otherwise the job fails with an import error at agent start.
+  framework itself may run under a different Python.  The host-side adapter
+  class is *not* what executes in the container: the container installs
+  mini-swe-agent from PyPI and runs **its own** agent class.
 
-  In practice: publish the package to the image, or mount the source
-  directory and add it to `PYTHONPATH` in the job's environment.  The IFEval
-  base image does exactly this (`scripts/build_ifeval_tasks.py`): the `rsi`
-  package is copied to `/opt/rsi` and exposed through `PYTHONPATH`, because
-  the `uv tool` venv that Harbor creates for mini-swe-agent is *isolated* --
-  a `pip install` into the image's system Python would not be visible to it.
+  This is why the rollouts run mini in its default mode.  A custom agent class
+  would have to be importable **inside the task image** -- otherwise the job
+  fails with an import error at agent start.  In practice: publish the package
+  to the image, or mount the source directory and add it to `PYTHONPATH` in the
+  job's environment.  The `uv tool` venv that Harbor creates for
+  mini-swe-agent is *isolated*, so a `pip install` into the image's system
+  Python would not be visible to it.
 
 ### 5.1 The tool-call protocol cannot work inside the container (`mcp`)
 

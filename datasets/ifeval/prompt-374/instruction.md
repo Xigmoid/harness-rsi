@@ -1,6 +1,0 @@
-Rewrite the following sentence in a more formal way: "Them youngins be always on that damn phone". Imagine you are the president of the United States. Avoid using the word "youngins" and "damn" throughout your entire response.
-
-Please repleat the entire first line above, then give your rewrite. Do not add any word before that. In other words, your entire response should start with "Rewrite the following".
-
-Write your complete answer to the file `/app/response.txt`.
-The file must contain the answer and nothing else.

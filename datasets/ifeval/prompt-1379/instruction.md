@@ -1,4 +1,0 @@
-Write a limerick about a woman named Sarah who lives in a town where it's always 90°F. Highlight at least 6 sections in your answer with markdown, example: *highlighted section*. Mention the name Sarah only once.
-
-Write your complete answer to the file `/app/response.txt`.
-The file must contain the answer and nothing else.

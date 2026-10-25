@@ -76,9 +76,10 @@ make setup
 ```
 
 Two virtual environments, for two reasons: `.venv` carries the helper
-scripts' dependencies (PyYAML, the HuggingFace hub client, the project's own
-`rsi` package, which the Harbor adapters import), and `.venv312` carries
-Harbor 0.24.0, which needs Python 3.12.
+scripts' dependencies (PyYAML, pyarrow, the HuggingFace hub client), and
+`.venv312` carries Harbor 0.24.0, which needs Python 3.12.  The `rsi`
+package -- the two Harbor adapters -- is imported by the drivers through
+`PYTHONPATH`, so it does not have to be installed at all.
 
 ### Step 1 -- the Docker images
 
@@ -215,10 +216,21 @@ in full, with the evidence, in `opencode_sft/EXECUTION_PLAN.md`.
 
 ---
 
-## 6. The rest of the repository
+## 6. What this repository contains
 
-`harness-rsi` also contains the **RSI** framework the annotation grew out
-of: a typed-configuration search over agent harnesses, with its own
-optimizer, ledger and study scripts (`rsi/`, `harness/`, `scripts/`,
-`tests/`).  It is independent of the annotation pipeline above; see the
-top-level `README.md` for that half.
+Only the annotation pipeline.  The three pieces:
+
+| | |
+|---|---|
+| `opencode_sft/` | the pipeline: the two drivers, the recording proxy, the converters, the validator, the merger, the images, and the execution notes |
+| `rsi/` | the two Harbor adapters (`mini-swe-agent` and `opencode`) and the paths they share with the container side |
+| `scripts/`, `datasets/base/toolchain/`, `audit/` | the registry builders, the mini-swe-agent bundle's Dockerfile, and the audit of what Harbor and mini-swe-agent actually do |
+
+The task registries, the toolchain bundle, the images and the finished dataset
+are all derived artefacts, and none of them is in git -- they are rebuilt from
+public sources, or published as a GitHub Release.
+
+The RSI framework the annotation grew out of (a typed-configuration search over
+agent harnesses, with its own optimizer, ledger and benchmark suites) is **not**
+part of this repository: it is a separate research line, and it shares nothing
+with the annotation except the two Harbor adapters above.

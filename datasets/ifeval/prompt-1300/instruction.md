@@ -1,7 +1,0 @@
-Write a short proposal for a new research project that investigates how language evolves over time. I want to make it challenging, so:
-1. Do not include any commas in your response.
-2. Do not include the letter "c" anywhere in your response.
-3. Your response should contain at least 250 words.
-
-Write your complete answer to the file `/app/response.txt`.
-The file must contain the answer and nothing else.

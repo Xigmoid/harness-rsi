@@ -1,0 +1,37 @@
+{
+  "dataset_id": "terminal-sft-5",
+  "created": "2026-10-23",
+  "note": "5 个随机终端操作任务；每个任务分别用 mini-swe-agent 和 opencode 跑，产出原始轨迹 + OpenAI 格式 SFT 样本。",
+  "tasks": [
+    {
+      "id": "01",
+      "slug": "csv-column-sum",
+      "title": "CSV 列求和",
+      "task": "在当前工作目录创建 sales.csv，内容正好三行，格式为 `item,price`：apple,3 和 banana,5 和 cherry,2。然后用 awk 求出 price 列的总和并打印这个总和。最后用 cat sales.csv 再确认一遍文件内容。完成后用一句话给出总和。"
+    },
+    {
+      "id": "02",
+      "slug": "locate-function",
+      "title": "代码里定位函数定义",
+      "task": "在当前工作目录创建 app.py，内容是一个 Python 文件，里面定义一个函数 `def target_handler(payload):` 并在函数体里 return payload。创建之后用 grep -n 定位 target_handler 的行号并打印出来。然后用 sed -n 把该行附近的内容打印出来看看。完成后用一句话说明 target_handler 在第几行。"
+    },
+    {
+      "id": "03",
+      "slug": "dir-tree-permissions",
+      "title": "多层目录与权限",
+      "task": "在当前工作目录创建嵌套目录 a/b/c。然后把 a/b 的权限改成 700。接着用 find 把 a 下面所有目录列出来打印。最后用 ls -la a/b 确认权限确实是 700。完成后用一句话说明你看到了什么权限。"
+    },
+    {
+      "id": "04",
+      "slug": "json-rewrite",
+      "title": "JSON 重写",
+      "task": "在当前工作目录创建 config.json，内容是一个 JSON 对象，含 `host`、`port`、`tags` 三个键，其中 tags 是一个含三个字符串元素的数组。然后用 python3 读入它，把 port 改成 8080，写到 config.flat.json，格式改成扁平的三个顶层键（host、port、tags 仍保留）。最后 cat config.flat.json 验证。完成后用一句话说明新文件里 port 的值。"
+    },
+    {
+      "id": "05",
+      "slug": "word-frequency",
+      "title": "词频统计",
+      "task": "在当前工作目录创建 notes.txt，写入包含重复单词的多行英文文本（至少出现 banana 三次、apple 两次）。然后用 tr + sort + uniq -c 的组合统计词频并打印出来。最后用 wc -w 统计总词数。完成后用一句话说明哪个词出现次数最多。"
+    }
+  ]
+}

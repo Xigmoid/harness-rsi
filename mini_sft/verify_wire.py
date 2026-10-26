@@ -47,10 +47,13 @@ from typing import Any
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
-PILOT = HERE.parent / "work" / "pilot" / "terminal-5task"
 
 #: The reference implementation of the conversion, from the pilot.
-sys.path.insert(0, str(PILOT))
+#:
+#: The pilot's *artefacts* (the captures, the raw harness output) are
+#: generated, so they are not in the repository -- but the converter that the
+#: wire check compares against is source code, and it is.
+sys.path.insert(0, str(REPO / "common" / "pilot"))
 
 from to_openai_sft import mini_to_openai  # noqa: E402
 

@@ -46,14 +46,16 @@ import argparse
 import hashlib
 import json
 import random
+import sys
 import shutil
 from pathlib import Path
 from typing import Any, Callable
 
-from common.shared_network import compose_snippet
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent.parent))
+
+from common.shared_network import compose_snippet  # noqa: E402
 
 #: The plain family image: an empty ``/app`` on ubuntu 24.04, with python3.12,
 #: node and opencode.  The generated tasks are self-contained, so they need

@@ -157,6 +157,7 @@ fields are complete -- and it writes atomically.
 | `minimax.py` | the second endpoint; **off** by default |
 | `images/` | the base images (opencode is baked into them) |
 | `tools/` | the one-off tools that were written along the way |
+| `pilot/` | the mini-vs-opencode comparison: the reference converter, the wire-parity check, and the methodology write-up.  Its captured artefacts are in `work/pilot/terminal-5task/` |
 
 `minimax.py` is kept because the mechanism is sound and switching the second
 model back on is a matter of command-line flags -- but the current

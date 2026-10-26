@@ -45,15 +45,12 @@ opencode_sft/
     │   ├── dataset.jsonl       # one row per rollout
     │   ├── summary.json        # counts and the validation report
     │   └── verification.json   # the independent check
-    ├── terminal-5task/         # the mini-vs-opencode comparison
-    │   ├── README.md           # the methodology: model-side capture, wire parity, pitfalls
-    │   ├── tasks.json          # five terminal tasks
-    │   ├── to_openai_sft.py    # harness artefacts → OpenAI messages
-    │   ├── build_sft.py        # batch conversion + the byte-for-byte wire check
-    │   ├── captures/           # the recorded requests, one file per harness
-    │   └── {mini,opencode}/{raw,sft}/  # the harness artefacts and the converted samples
     └── clawgym-opencode-glm-sft.jsonl   # the ClawGym half of the dataset
 ```
+
+The mini-vs-opencode comparison — the methodology, the reference converter and
+the wire-parity check — is in [`../common/pilot/`](../common/pilot/); its
+captured artefacts are in `work/pilot/terminal-5task/`.
 
 The shared pieces, and what they are for:
 

@@ -68,15 +68,16 @@ import hashlib
 import json
 import os
 import shutil
+import sys
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-from common.shared_network import SHARED_NETWORK
-
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent.parent
 sys.path.insert(0, str(HERE.parent.parent))
+
+from common.shared_network import SHARED_NETWORK  # noqa: E402
 
 #: The four families, and the shared base image each one runs on.
 #:
